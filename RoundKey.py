@@ -64,6 +64,7 @@ class RoundKey:
             l >>= 8
             res.append(x)
         
+        res.reverse()
         return res
 
     # Get list of round key (length = 16, each key length is 128 bit)
