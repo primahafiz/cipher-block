@@ -69,7 +69,7 @@ class RoundKey:
     
     # Arithmetic right shit (x >> k)
     def arithmeticRightShift(self, x : int, k : int):
-        mask = (1 << 64)
+        mask = (1 << 63)
         for i in range(k):
             if(x & 1 != 0):
                 x >>= 1
@@ -114,12 +114,14 @@ class RoundKey:
             for i in range(8):
                 keyL += listKey[0][i]
                 keyL <<= 8
+            keyL >>= 8
 
             keyR = 0
             for i in range(8):
                 keyR += listKey[0][i + 8]
                 keyR <<= 8
-            
+            keyR >>= 8
+
             keyL = self.arithmeticRightShift(keyL,self.bitCount(keyL))
             keyR = self.arithmeticRightShift(keyR,self.bitCount(keyR))
 
