@@ -47,7 +47,7 @@ class RoundKey:
             return res
         
         new_mat = self.matPow(mat,n//2)
-        if(n&1):
+        if(n % 2 == 1):
             return self.mul(mat,new_mat)
         else:
             return new_mat
@@ -66,7 +66,27 @@ class RoundKey:
         
         res.reverse()
         return res
-
+    
+    # Arithmetic right shit (x >> k)
+    def arithmeticRightShift(self, x : int, k : int):
+        mask = (1 << 64)
+        for i in range(k):
+            if(x & 1 != 0):
+                x >>= 1
+                x |= mask
+            else:
+                x >>= 1
+        
+        return x
+    
+    def bitCount(self, x: int):
+        res = 0
+        while(x != 0):
+            if(x % 2 == 1):
+                res += 1
+            x >>= 1
+        return res
+    
     # Get list of round key (length = 16, each key length is 128 bit)
     def getListRoundKey(self):
         if(len(self.listRoundKey) != 0):
@@ -80,10 +100,6 @@ class RoundKey:
 
         for i in range(N):
 
-            # Left shift one bit for l and r
-            l <<= 1
-            r <<= 1
-
             # Xor l and r (l^r)
             xor = l ^ r
 
@@ -94,16 +110,26 @@ class RoundKey:
             listKey = self.mul(newMat,[self.splitTo8Bit(l,r)])
 
             # Convert listKey to integer
-            key = 0
-            for i in range(16):
-                key += listKey[0][i]
-                key <<= 8
-        
+            keyL = 0
+            for i in range(8):
+                keyL += listKey[0][i]
+                keyL <<= 8
+
+            keyR = 0
+            for i in range(8):
+                keyR += listKey[0][i + 8]
+                keyR <<= 8
+            
+            keyL = self.arithmeticRightShift(keyL,self.bitCount(keyL))
+            keyR = self.arithmeticRightShift(keyR,self.bitCount(keyR))
+
+            key = keyL ^ keyR
+
             res.append(key)
 
             # Swap key l = last 64 bit, r = first 64 bit
-            l = key % (1 << 64)
-            r = key >> 64
+            l = keyR
+            r = keyL
 
         # Copy to listRoundKey
         for i in range(16):
@@ -113,5 +139,5 @@ class RoundKey:
 
 
 
-# x = RoundKey(146160920599406919205645990694686082802)
-# print(x.getListRoundKey())
+x = RoundKey(146160920599406919205645990694686082803)
+print(x.getListRoundKey())
