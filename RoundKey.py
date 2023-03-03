@@ -138,6 +138,7 @@ class RoundKey:
         return res
 
 
+if __name__ == "__main__":
+    x = RoundKey(146160920599406919205645990694686082803)
+    print(x.getListRoundKey())
 
-x = RoundKey(146160920599406919205645990694686082803)
-print(x.getListRoundKey())
