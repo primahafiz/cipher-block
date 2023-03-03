@@ -30,4 +30,9 @@ def str_to_int(str):
     return intcaststr(key)
 
 def bitfield(n):
-    return [1 if digit=='1' else 0 for digit in bin(n)[2:]]
+    bits = [1 if digit=='1' else 0 for digit in bin(n)[2:]]
+    if len(bits) % 8 != 0:
+        sisa = 8 - (len(bits) % 8)
+        for i in range(sisa):
+            bits.insert(0,0)
+    return bits
