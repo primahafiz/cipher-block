@@ -3,8 +3,8 @@ from RoundFunction import round_function
 import utils
 
 def faestel(a,b,c,d,key):
-    resF1 = round_function(a,key)
-    resF2 = round_function(c,key)
+    resF1 = round_function(a,key, 1)
+    resF2 = round_function(c,key, 1)
     resXor1 = b ^ resF1
     resXor2 = d ^ resF2
     return resXor1, c, resXor2, a
@@ -27,21 +27,24 @@ def encrypt(plain_text:str = '',external_key:str=''):
     pt_second = pt_left % (1 << 32)
     pt_third = pt_right >> 32
     pt_fourth = pt_right % (1 << 32)
-    # print(utils.frombits(utils.bitfield(pt_first)))
-    # print(utils.frombits(utils.bitfield(pt_second)))
-    # print(utils.frombits(utils.bitfield(pt_third)))
-    # print(utils.frombits(utils.bitfield(pt_fourth)))
 
     rk = RoundKey(key_int)
     round_keys : list[int] = rk.getListRoundKey()
 
     key1 = round_keys[0]
 
+    print(utils.frombits(utils.bitfield(pt_first)))
+    print(utils.frombits(utils.bitfield(pt_second)))
+    print(utils.frombits(utils.bitfield(pt_third)))
+    print(utils.frombits(utils.bitfield(pt_fourth)))
     a,b,c,d = faestel(pt_first,pt_second,pt_third,pt_fourth,key1)
-
+    # print(a, b, c, d)
     a,b,c,d = faestel(d,a,b,c,key1)
-
-
+    # print(a, b, c, d)
+    print(utils.frombits(utils.bitfield(a)))
+    print(utils.frombits(utils.bitfield(b)))
+    print(utils.frombits(utils.bitfield(c)))
+    print(utils.frombits(utils.bitfield(d)))
 
     # print(pt_first.bit_length())
     # n = 1
@@ -78,7 +81,4 @@ def encrypt(plain_text:str = '',external_key:str=''):
 
 
 if __name__ == "__main__":
-    a = b'sda'
-    b = b'ss'
-    a = a >> b
     encrypt(plain_text='nama saya dimas=',external_key='sdsdrvdgenboris?')
