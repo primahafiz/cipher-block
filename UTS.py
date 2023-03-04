@@ -2,23 +2,23 @@ from RoundKey import RoundKey
 from RoundFunction import round_function
 import utils
 
-def faestel(a,b,c,d,key):
-    resF1 = round_function(a,key, 1)
-    resF2 = round_function(c,key, 1)
+N_ROUND = 16
+BLOCK_SIZE = 16
+
+def feistel(a,b,c,d,key, round):
+    resF1 = round_function(a,key, round)
+    resF2 = round_function(c,key, round)
     resXor1 = b ^ resF1
     resXor2 = d ^ resF2
     return resXor1, c, resXor2, a
 
-def encrypt(plain_text:str = '',external_key:str=''):
+def dlr_cipher(plain_text:str = '',external_key:str='', encrypt: bool = True):
     
     # Bisa diganti utils.str_to_int
-    key =  utils.tobits(external_key)
-    key_int = utils.intcaststr(key)
+    key_int =  utils.str_to_int(external_key)
 
     # Bisa diganti utils.str_to_int
-    pt = utils.tobits(plain_text)
-    # print(pt, len(pt))
-    pt_int = utils.intcaststr(pt)
+    pt_int = utils.str_to_int(plain_text)
 
     pt_left = pt_int >> 64
     pt_right = pt_int % (1 << 64)
@@ -30,55 +30,96 @@ def encrypt(plain_text:str = '',external_key:str=''):
 
     rk = RoundKey(key_int)
     round_keys : list[int] = rk.getListRoundKey()
+    a,b,c,d = pt_first,pt_second,pt_third,pt_fourth
 
-    key1 = round_keys[0]
+    if encrypt:
+        for i in range(N_ROUND):
+            key = round_keys[i]
+            a,b,c,d = feistel(a,b,c,d,key,i+1)
+        a,b,c,d = d,a,b,c
+    else:
+        for i in range(N_ROUND):
+            key = round_keys[N_ROUND-1-i]
+            a,b,c,d = feistel(a,b,c,d,key,N_ROUND-i)
+        a,b,c,d = b,c,d,a
 
-    print(utils.frombits(utils.bitfield(pt_first)))
-    print(utils.frombits(utils.bitfield(pt_second)))
-    print(utils.frombits(utils.bitfield(pt_third)))
-    print(utils.frombits(utils.bitfield(pt_fourth)))
-    a,b,c,d = faestel(pt_first,pt_second,pt_third,pt_fourth,key1)
-    # print(a, b, c, d)
-    a,b,c,d = faestel(d,a,b,c,key1)
-    # print(a, b, c, d)
-    print(utils.frombits(utils.bitfield(a)))
-    print(utils.frombits(utils.bitfield(b)))
-    print(utils.frombits(utils.bitfield(c)))
-    print(utils.frombits(utils.bitfield(d)))
+    res = utils.bitfield(a) + utils.bitfield(b) + utils.bitfield(c) + utils.bitfield(d)
+    return utils.frombits(res)
 
-    # print(pt_first.bit_length())
-    # n = 1
-    # for bit in utils.bitfield(pt_first):
-    #     print(bit, end='')
-    #     n += 1
-    #     if n == 9:
-    #         n = 1
-    #         print()
-    # print()
-    # print(pt_second.bit_length())
-    # print(pt_second)
-    # n = 1
-    # for bit in utils.bitfield(pt_second):
-    #     print(bit, end='')
-    #     n += 1
-    #     if n == 9:
-    #         n = 1
-    #         print()
-    # print()
-    # print(pt_third.bit_length())
-    # print(pt_fourth.bit_length())
 
+def interactive():
+    print("Selamat datang di program cipher blok DLR")
+    print("Silakan pilih angka mode yang tersedia:")
+    print("  1. Enkripsi")
+    print("  2. Dekripsi")
+    print("  0. Keluar")
+
+    print(">> ",end="")
+    mode = int(input())
+
+    while(mode != 1 and mode != 2 and mode != 0):
+        print("Input tidak valid. Masukkan ulang!")
+        print(">> ",end="")
+        mode = int(input())
+
+    match mode:
+        case 0:
+            exit()
+        case 1:
+            print("Masukkan plain text")
+        case 2:
+            print("Masukkan cipher text")
     
+    print(">> ",end="")
+    text = input()
+    print("Masukkan key")
+    print(">> ",end="")
+    external_key = input()
 
+    # text = 'nama saya dimas='
+    # external_key = 'sdsdrvdgenboris?'
+
+    if(len(text) % BLOCK_SIZE != 0):
+        sisa = BLOCK_SIZE - (len(text) % BLOCK_SIZE)
+        text += '~' * sisa
+
+
+    result_text = ""
+    match mode:
+        case 1:
+            for i in range(0,len(text),BLOCK_SIZE):
+                res = dlr_cipher(text[i:i+BLOCK_SIZE],external_key)
+                result_text += res
+        case 2:
+            for i in range(0,len(text),BLOCK_SIZE):
+                res = dlr_cipher(text[i:i+BLOCK_SIZE],external_key,False)
+                result_text += res
     
-    # for key in round_keys:
-    #     bf = utils.bitfield(key)
-    #     print(len(bf))
-        
-            
+    print(result_text)
+
+def another_main():
+    text = 'nama saya dimas='
+    external_key = 'sdsdrvdgenboris?'
+
+    if(len(text) % BLOCK_SIZE != 0):
+        sisa = BLOCK_SIZE - (len(text) % BLOCK_SIZE)
+        text += '~' * sisa
 
 
+    cipher_text = ""
+    for i in range(0,len(text),BLOCK_SIZE):
+        res = dlr_cipher(text[i:i+BLOCK_SIZE],external_key)
+        cipher_text += res
+
+    print(cipher_text)
+    plain_text = ""
+    for i in range(0,len(cipher_text),BLOCK_SIZE):
+        res = dlr_cipher(cipher_text[i:i+BLOCK_SIZE],external_key,False)
+        plain_text += res
+    
+    print(plain_text)
 
 
 if __name__ == "__main__":
-    encrypt(plain_text='nama saya dimas=',external_key='sdsdrvdgenboris?')
+    # interactive()
+    another_main()
