@@ -1,4 +1,6 @@
+
 def tobits(s):
+    ''' converts string to list of bits'''
     result = []
     for c in s:
         bits = bin(ord(c))[2:]
@@ -7,6 +9,7 @@ def tobits(s):
     return result
 
 def frombits(bits):
+    ''' converts list of bits to string'''
     chars = []
     for b in range(int(len(bits) / 8)):
         byte = bits[b*8:(b+1)*8]

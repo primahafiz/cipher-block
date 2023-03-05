@@ -62,13 +62,12 @@ def interactive():
         print(">> ",end="")
         mode = int(input())
 
-    match mode:
-        case 0:
-            exit()
-        case 1:
-            print("Masukkan plain text")
-        case 2:
-            print("Masukkan cipher text")
+    if mode == 0:
+        exit()
+    elif mode == 1:
+        print("Masukkan plain text")
+    elif mode == 2:
+        print("Masukkan cipher text")
     
     print(">> ",end="")
     text = input()
@@ -85,41 +84,17 @@ def interactive():
 
 
     result_text = ""
-    match mode:
-        case 1:
-            for i in range(0,len(text),BLOCK_SIZE):
-                res = dlr_cipher(text[i:i+BLOCK_SIZE],external_key)
-                result_text += res
-        case 2:
-            for i in range(0,len(text),BLOCK_SIZE):
-                res = dlr_cipher(text[i:i+BLOCK_SIZE],external_key,False)
-                result_text += res
+    if mode == 1:
+        for i in range(0,len(text),BLOCK_SIZE):
+            res = dlr_cipher(text[i:i+BLOCK_SIZE],external_key)
+            result_text += res
+    if mode == 2:
+        for i in range(0,len(text),BLOCK_SIZE):
+            res = dlr_cipher(text[i:i+BLOCK_SIZE],external_key,False)
+            result_text += res
     
     print(result_text)
 
-def another_main():
-    text = 'nama saya dimas='
-    external_key = 'sdsdrvdgenboris?'
-
-    if(len(text) % BLOCK_SIZE != 0):
-        sisa = BLOCK_SIZE - (len(text) % BLOCK_SIZE)
-        text += '~' * sisa
-
-
-    cipher_text = ""
-    for i in range(0,len(text),BLOCK_SIZE):
-        res = dlr_cipher(text[i:i+BLOCK_SIZE],external_key)
-        cipher_text += res
-
-    print(cipher_text)
-    plain_text = ""
-    for i in range(0,len(cipher_text),BLOCK_SIZE):
-        res = dlr_cipher(cipher_text[i:i+BLOCK_SIZE],external_key,False)
-        plain_text += res
-    
-    print(plain_text)
-
-
 if __name__ == "__main__":
-    # interactive()
-    another_main()
+    interactive()
+    
